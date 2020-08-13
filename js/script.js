@@ -128,7 +128,7 @@ const payment = () => {
   // set the display to none
   paypal.style.display = "none";
   bitcoin.style.display = "none";
-  creditCard.style.display = "none";
+  creditCard.style.display = "";
 
   // event listener to see what payment method is selected
   field.addEventListener("change", (e) => {
@@ -148,7 +148,7 @@ const payment = () => {
       ? dispay("none", "", "none")
       : opt == "bitcoin"
       ? dispay("none", "none", "")
-      : dispay("none", "none", "none");
+      : dispay("", "none", "none");
   });
 };
 payment();
@@ -170,6 +170,9 @@ const validation = () => {
   const span = field.querySelector("legend > span");
   const label = field.querySelectorAll("label");
 
+  // final validation check
+  let validated = false;
+
   // hide the spans
   paymentSpan.style.display = "none";
   span.style.display = "none";
@@ -179,8 +182,6 @@ const validation = () => {
 
   // event listener when the form is submited
   form.addEventListener("submit", (e) => {
-    e.preventDefault();
-
     var checkboxes = document.querySelectorAll('input[type="checkbox"]');
     var checkedOne = Array.prototype.slice
       .call(checkboxes)
@@ -190,6 +191,13 @@ const validation = () => {
     const border = (val1, val2) => {
       emailField.style.border = val1;
       nameField.style.border = val2;
+
+      // check if the forms are filled correctly and change the validated value
+      if (val1 == "" && val2 == "") {
+        validated = true;
+      } else {
+        validated = false;
+      }
     };
 
     // check if the values of the emil and name fields
@@ -202,33 +210,44 @@ const validation = () => {
       : border("2px solid red", "2px solid red");
 
     // check if at least one input is checked
-    checkedOne ? (span.style.display = "none") : (span.style.display = "block");
+    if (checkedOne) {
+      span.style.display = "none";
+      validated = true;
+    } else {
+      span.style.display = "block";
+      validated = false;
+    }
 
     // check if payment method is selected and filled
+
     if (payment.options[0].selected) {
-      paymentSpan.style.display = "block";
-    } else {
-      paymentSpan.style.display = "none";
-      if (payment.options[1].selected) {
-        Array.prototype.slice.call(creditCard).some((x) => {
-          if (x.value == "") {
-            x.style.border = "2px solid red";
-          } else {
-            x.style.border = "";
+      // check if the card number is valid
+      /^\d{16}$/g.test(creditCard[0].value)
+        ? (creditCard[0].style.border = "")
+        : (creditCard[0].style.border = "2px solid red");
 
-            // check if the card number is valid
-            /^\d{16}$/g.test(creditCard[0].value)
-              ? (creditCard[0].style.border = "")
-              : (creditCard[0].style.border = "2px solid red");
+      // check if poscode is valid
+      /(^\d{5}$)|(^\d{5}-\d{4}$)/.test(creditCard[1].value)
+        ? (creditCard[1].style.border = "")
+        : (creditCard[1].style.border = "2px solid red");
 
-            // check if the CVV is valud
-            /^\d{3}$/g.test(creditCard[2].value)
-              ? (creditCard[2].style.border = "")
-              : (creditCard[2].style.border = "2px solid red");
-          }
-        });
-      }
+      // check if the CVV is valid
+      /^\d{3}$/g.test(creditCard[2].value)
+        ? (creditCard[2].style.border = "")
+        : (creditCard[2].style.border = "2px solid red");
+
+      [...creditCard].map((x) => {
+        if (x.style.border == "2px solid red") {
+          validated = false;
+        } else {
+          validated = true;
+        }
+      });
     }
+
+    // if validated is true then submit the form
+    validated == true ? null : e.preventDefault();
   });
 };
 validation();
+console.log(validation());
