@@ -170,8 +170,10 @@ const validation = () => {
   const span = field.querySelector("legend > span");
   const label = field.querySelectorAll("label");
 
+  const inputs = form.querySelectorAll("input[required]");
+
   // final validation check
-  let validated = false;
+  let CbValidation = false;
 
   // hide the spans
   paymentSpan.style.display = "none";
@@ -179,6 +181,8 @@ const validation = () => {
 
   // mail regex
   const mailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  // name regex
+  const nameRegex = /^(([A-Za-z]+[\-\']?)*([A-Za-z]+)?\s)+([A-Za-z]+[\-\']?)*([A-Za-z]+)?$/;
 
   // event listener when the form is submited
   form.addEventListener("submit", (e) => {
@@ -191,63 +195,53 @@ const validation = () => {
     const border = (val1, val2) => {
       emailField.style.border = val1;
       nameField.style.border = val2;
-
-      // check if the forms are filled correctly and change the validated value
-      if (val1 == "" && val2 == "") {
-        validated = true;
-      } else {
-        validated = false;
-      }
     };
 
     // check if the values of the emil and name fields
-    mailRegex.test(emailField.value) && nameField.value !== ""
+    mailRegex.test(emailField.value) && nameRegex.test(nameField.value)
       ? border("", "")
       : mailRegex.test(emailField.value)
       ? border("", "2px solid red")
-      : nameField.value !== ""
+      : nameRegex.test(nameField.value)
       ? border("2px solid red", "")
       : border("2px solid red", "2px solid red");
 
     // check if at least one input is checked
     if (checkedOne) {
       span.style.display = "none";
-      validated = true;
+      CbValidation = true;
     } else {
       span.style.display = "block";
-      validated = false;
+      CbValidation = false;
     }
 
-    // check if payment method is selected and filled
+    const paymentValid = (val1, val2, val3) => {
+      paymentSpan.style.display = val1;
+      creditCard[val3].style.border = val2;
+    };
 
+    // check if payment method is selected and filled
     if (payment.options[0].selected) {
       // check if the card number is valid
       /^\d{16}$/g.test(creditCard[0].value)
-        ? (creditCard[0].style.border = "")
-        : (creditCard[0].style.border = "2px solid red");
+        ? paymentValid("none", "", 0)
+        : paymentValid("block", "2px solid red", 0);
 
       // check if poscode is valid
       /(^\d{5}$)|(^\d{5}-\d{4}$)/.test(creditCard[1].value)
-        ? (creditCard[1].style.border = "")
-        : (creditCard[1].style.border = "2px solid red");
+        ? paymentValid("none", "", 1)
+        : paymentValid("block", "2px solid red", 1);
 
       // check if the CVV is valid
       /^\d{3}$/g.test(creditCard[2].value)
-        ? (creditCard[2].style.border = "")
-        : (creditCard[2].style.border = "2px solid red");
-
-      [...creditCard].map((x) => {
-        if (x.style.border == "2px solid red") {
-          validated = false;
-        } else {
-          validated = true;
-        }
-      });
+        ? paymentValid("none", "", 2)
+        : paymentValid("block", "2px solid red", 2);
     }
 
     // if validated is true then submit the form
-    validated == true ? null : e.preventDefault();
+
+    const inputValidation = [...inputs].every((input) => input.checkValidity());
+    CbValidation == true && inputValidation == true ? null : e.preventDefault();
   });
 };
 validation();
-console.log(validation());
