@@ -236,10 +236,13 @@ const validation = () => {
       /^\d{3}$/g.test(creditCard[2].value)
         ? paymentValid("none", "", 2)
         : paymentValid("block", "2px solid red", 2);
+    } else {
+      for (let i = 0; i < creditCard.length; i++) {
+        creditCard[i].required = false;
+      }
     }
 
     // if validated is true then submit the form
-
     const inputValidation = [...inputs].every((input) => input.checkValidity());
     CbValidation == true && inputValidation == true ? null : e.preventDefault();
   });
