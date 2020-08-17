@@ -218,6 +218,11 @@ const validation = () => {
     const paymentValid = (val1, val2, val3) => {
       paymentSpan.style.display = val1;
       creditCard[val3].style.border = val2;
+
+      if (val1 == "none") {
+      } else {
+        e.preventDefault();
+      }
     };
 
     // check if payment method is selected and filled
