@@ -228,7 +228,7 @@ const validation = () => {
     // check if payment method is selected and filled
     if (payment.options[0].selected) {
       // check if the card number is valid
-      /^\d{16}$/g.test(creditCard[0].value)
+      /^\d{13,16}$/g.test(creditCard[0].value)
         ? paymentValid("none", "", 0)
         : paymentValid("block", "2px solid red", 0);
 
